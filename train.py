@@ -38,15 +38,20 @@ def main(args):
 
     if args.model == 'gnn':
         model = GNN(args.nnodes, args.window_size, args.ngnn, args.gsllayer, args.nhidden,
-                    args.alpha, args.k)
+                    args.alpha, args.k, device=device)
     elif args.model == '1dcnn':
-        model = CNN1D()
+        model = CNN1DTEP(args.batch_size, args.window_size, args.nnodes)
     elif args.model == 'mlp':
-        model = MLP()
+        model = nn.Sequential(
+                             nn.Linear(args.nnodes*args.window_size, 512), nn.ReLU(),
+                             nn.Linear(512, 29),
+                             )
     else:
-        print('wrong model\'s name')
+        print('wrong model\'s name!')
 
-        for epoch in range(args.num_epochs):
+    model.to(device)
+    optimizer = Adam(model.parameters(), lr=0.001)
+    for epoch in range(args.num_epochs):
 
 
 
