@@ -1,18 +1,21 @@
+# Graph Convolutional Layer:
 class GCNLayer(nn.Module):
     def __init__(self, in_dim, out_dim):
         super().__init__()
         
         self.dense = nn.Linear(in_dim, out_dim)
 
-    def forward(self, adj, feat):
+    def forward(self, adj, X):
         adj = adj + torch.eye(adj.size(0)).to(adj.device)
-        h = self.dense(feat)
+        h = self.dense(X)
         norm = adj.sum(1)**(-1/2)
         h = norm[None, :] * adj * norm[:, None] @ h
         return h
-      
-class Graph_Relu_W(nn.Module):
-    def __init__(self, nnodes=52):
+    
+    
+# A = ReLu(W)    
+class Graph_ReLu_W(nn.Module):
+    def __init__(self, nnodes):
         super(Graph_Relu_W, self).__init__()
         self.nnodes = nnodes
         self.A = nn.Parameter(torch.randn(nnodes, nnodes).to(device), requires_grad=True).to(device)
@@ -20,26 +23,93 @@ class Graph_Relu_W(nn.Module):
     def forward(self, idx):
         return F.relu(self.A)
 
+    
+# A for Directed graphs:
 class Graph_Directed_A(nn.Module):
       
-    def __init__(self, num_nodes=52, window_size=10, alpha=3):
+    def __init__(self, num_nodes, window_size, alpha, k=None, device='cpu'):
         super(Graph_Directed_A, self).__init__()
         
         self.alpha = alpha
+        self.k = k
         self.device = device
         
-        self.emb1 = nn.Embedding(num_nodes, window_size)
-        self.emb2 = nn.Embedding(num_nodes, window_size)
-        self.lin1 = nn.Linear(window_size,window_size)
-        self.lin2 = nn.Linear(window_size,window_size)
+        self.e1 = nn.Embedding(num_nodes, window_size)
+        self.e2 = nn.Embedding(num_nodes, window_size)
+        self.l1 = nn.Linear(window_size,window_size)
+        self.l2 = nn.Linear(window_size,window_size)
         
     def forward(self, idx):
         
-        nodevec1 = self.emb1(idx)
-        nodevec2 = self.emb2(idx)
-        nodevec1 = torch.tanh(self.alpha*self.lin1(nodevec1))
-        nodevec2 = torch.tanh(self.alpha*self.lin2(nodevec2))
-        a = torch.mm(nodevec1, nodevec2.transpose(1,0))
-        adj = F.relu(torch.tanh(self.alpha*a))
+        m1 = torch.tanh(self.alpha*self.l1(self.e1(idx)))
+        m2 = torch.tanh(self.alpha*self.l2(self.e2(idx)))
+        adj = F.relu(torch.tanh(self.alpha*torch.mm(m1, m2.transpose(1,0))))
+        
+        if self.k:
+            mask = torch.zeros(idx.size(0), idx.size(0)).to(self.device)
+            mask.fill_(float('0'))
+            s1,t1 = (adj + torch.rand_like(adj)*0.01).topk(self.k,1)
+            mask.scatter_(1,t1,s1.fill_(1))
+            adj = adj*mask
+        
+        return adj
+
+
+# A for Uni-directed graphs:
+class Graph_Uni_Directed_A(nn.Module):
+      
+    def __init__(self, num_nodes, window_size, alpha, k=None, device='cpu'):
+        super(Graph_Directed_A, self).__init__()
+        
+        self.alpha = alpha
+        self.k = k
+        self.device = device
+        
+        self.e1 = nn.Embedding(num_nodes, window_size)
+        self.e2 = nn.Embedding(num_nodes, window_size)
+        self.l1 = nn.Linear(window_size,window_size)
+        self.l2 = nn.Linear(window_size,window_size)
+        
+    def forward(self, idx):
+        
+        m1 = torch.tanh(self.alpha*self.l1(self.e1(idx)))
+        m2 = torch.tanh(self.alpha*self.l2(self.e2(idx)))
+        adj = F.relu(torch.tanh(self.alpha*(torch.mm(m1, m2.transpose(1,0)) - torch.mm(m2, m1.transpose(1,0)))
+        
+        if self.k:
+            mask = torch.zeros(idx.size(0), idx.size(0)).to(self.device)
+            mask.fill_(float('0'))
+            s1,t1 = (adj + torch.rand_like(adj)*0.01).topk(self.k,1)
+            mask.scatter_(1,t1,s1.fill_(1))
+            adj = adj*mask
+        
+        return adj
+                            
+            
+# A for Undirected graphs:
+class Graph_Undirected_A(nn.Module):
+      
+    def __init__(self, num_nodes, window_size, alpha, k=None, device='cpu'):
+        super(Graph_Directed_A, self).__init__()
+        
+        self.alpha = alpha
+        self.k = k
+        self.device = device
+        
+        self.e1 = nn.Embedding(num_nodes, window_size)
+        self.l1 = nn.Linear(window_size,window_size)
+        
+    def forward(self, idx):
+        
+        m1 = torch.tanh(self.alpha*self.l1(self.e1(idx)))
+        m2 = torch.tanh(self.alpha*self.l1(self.e1(idx)))
+        adj = F.relu(torch.tanh(self.alpha*torch.mm(m1, m2.transpose(1,0))))
+        
+        if self.k:
+            mask = torch.zeros(idx.size(0), idx.size(0)).to(self.device)
+            mask.fill_(float('0'))
+            s1,t1 = (adj + torch.rand_like(adj)*0.01).topk(self.k,1)
+            mask.scatter_(1,t1,s1.fill_(1))
+            adj = adj*mask
         
         return adj
