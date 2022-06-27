@@ -15,7 +15,7 @@ class GCNLayer(nn.Module):
     
 # A = ReLu(W)    
 class Graph_ReLu_W(nn.Module):
-    def __init__(self, nnodes):
+    def __init__(self, nnodes, device):
         super(Graph_Relu_W, self).__init__()
         self.nnodes = nnodes
         self.A = nn.Parameter(torch.randn(nnodes, nnodes).to(device), requires_grad=True).to(device)
@@ -27,7 +27,7 @@ class Graph_ReLu_W(nn.Module):
 # A for Directed graphs:
 class Graph_Directed_A(nn.Module):
       
-    def __init__(self, num_nodes, window_size, alpha, k=None, device='cpu'):
+    def __init__(self, num_nodes, window_size, alpha, k=None, device):
         super(Graph_Directed_A, self).__init__()
         
         self.alpha = alpha
@@ -58,7 +58,7 @@ class Graph_Directed_A(nn.Module):
 # A for Uni-directed graphs:
 class Graph_Uni_Directed_A(nn.Module):
       
-    def __init__(self, num_nodes, window_size, alpha, k=None, device='cpu'):
+    def __init__(self, num_nodes, window_size, alpha, k=None, device):
         super(Graph_Directed_A, self).__init__()
         
         self.alpha = alpha
@@ -89,7 +89,7 @@ class Graph_Uni_Directed_A(nn.Module):
 # A for Undirected graphs:
 class Graph_Undirected_A(nn.Module):
       
-    def __init__(self, num_nodes, window_size, alpha, k=None, device='cpu'):
+    def __init__(self, num_nodes, window_size, alpha, k=None, device):
         super(Graph_Directed_A, self).__init__()
         
         self.alpha = alpha
