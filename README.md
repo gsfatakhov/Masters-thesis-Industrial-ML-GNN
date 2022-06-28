@@ -1,6 +1,6 @@
 # Masters-thesis-Industrial-ML-GNN
 
-The code of experiments for the master's thesis: Industrial ML: graph neural networks for fault diagnosis in multivariate sensor data.
+The code of experiments for the master's thesis: **Industrial ML: graph neural networks for fault diagnosis in multivariate sensor data**.
 
 ## Dataset
 
