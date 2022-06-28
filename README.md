@@ -14,15 +14,15 @@ The Tennessee Eastman Process (extended).
 
 `Experiment_2.ipynb` - training of GNN model with another architecture without graph structure learning layer. Adjacency matrices were obtained in Experiment 1:
 
-`corr_A.pt`
+`corr_A.pt` - adjacency matrix obtained by correlation method.
 
-`direct_A.pt`
+`direct_A.pt` - adjacency matrix obtained during the Experiment 1 for directed graph structure.
 
-`relu_A.pt`
+`relu_A.pt` - adjacency matrix obtained during the Experiment 1 as matrix of parameters.
 
-`uni_A.pt`
+`und_A.pt` - adjacency matrix obtained during the Experiment 1 for undirected graph structure.
 
-`und_A.pt`
+`uni_A.pt` - adjacency matrix obtained during the Experiment 1 for uni-directed graph structure.
 
 Next, to compare adjacency matrix with TEP diagram, GNN model from Experiment 1 was trained with max number of edges for each node equal to 3.
 
