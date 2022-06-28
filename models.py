@@ -5,15 +5,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 from layers import *
 
+
 class GNNTEP(nn.Module):    
-    def __init__(self, nnodes=52, window_size=100, ngnn=1, gsllayer='directed', nhidden=256,
-                 alpha=0.1, k, out_channels = 29, device='cpu'):
+    def __init__(self, nnodes, window_size, ngnn, gsllayer, nhidden, alpha, k, out_channels, device):
         super(GNNTEP, self).__init__()
         self.window_size = window_size
         self.nhidden = nhidden
         self.nnodes = nnodes
         self.device = device
-        self.idx = torch.arange(self.num_nodes).to(device)
+        self.idx = torch.arange(self.nnodes).to(device)
         self.adj = [0 for i in range(ngnn)]
         self.h = [0 for i in range(ngnn)]
         self.skip = [0 for i in range(ngnn)]
@@ -26,7 +26,7 @@ class GNNTEP(nn.Module):
         self.conv2 = nn.ModuleList()
         self.bnorm2 = nn.ModuleList()
         
-        for i in range(self.num_layers):
+        for i in range(self.ngnn):
             if gsllayer == 'relu':
                 self.graph_struct.append(Graph_ReLu_W(nnodes, device))
             elif gsllayer == 'directed':
@@ -47,7 +47,7 @@ class GNNTEP(nn.Module):
     
     def forward(self, X):
         
-        X = X.to(device)
+        X = X.to(self.device)
         
         for i in range(self.ngnn):
             self.adj[i] = self.graph_struct[i](self.idx)
@@ -67,8 +67,8 @@ class GNNTEP(nn.Module):
     
     def get_adj(self):
         return self.adj
-    
 
+    
 class CNN1DTEP(nn.Module):    
     def __init__(self, batch_size=512, window_size=100, features_size=52):        
         super(CNN1DTEP, self).__init__()
@@ -76,16 +76,21 @@ class CNN1DTEP(nn.Module):
         self.window_size = window_size
         self.features_size = features_size
         
-        self.conv1 = nn.Conv1d(features_size, features_size * 10, window_size, groups=52)
-        self.fc1 = nn.Linear(features_size * 10, 128)
-        self.fc2 = nn.Linear(128, 29)
+        self.conv1 = nn.Conv1d(features_size, features_size * 4, 5, 5, groups=52)
+        self.pool1 = nn.MaxPool1d(2, 2)
+        self.conv2 = nn.Conv1d(features_size * 4, features_size * 16, 5, 5, groups=208)
+        self.pool2 = nn.MaxPool1d(2, 2)
+        self.fc1 = nn.Linear(832, 256)
+        
+        self.fc2 = nn.Linear(256, 29)
         
     def forward(self, X):
         X = X.to(device)
         self.bach_size = X.shape[0]
-        X = F.relu(self.conv1(X))
-        X = X.reshape(self.bach_size, self.features_size * 10)
+        X = self.pool1(F.relu(self.conv1(X)))
+        X = self.pool2(F.relu(self.conv2(X)))
+        X = X.reshape(self.bach_size, 832)
         X = F.relu(self.fc1(X))
         X = self.fc2(X)
         
-        return X  
+        return X 
