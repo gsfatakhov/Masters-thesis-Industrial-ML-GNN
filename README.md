@@ -1,3 +1,3 @@
 # Masters-thesis-Industrial-ML-GNN
 
-is not ready...
+The code of experiments for the thesis: Industrial ML: graph neural networks for fault diagnosis in multivariate sensor data
