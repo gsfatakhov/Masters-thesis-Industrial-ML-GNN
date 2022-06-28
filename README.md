@@ -13,8 +13,9 @@ The Tennessee Eastman Process (extended).
 ## Experiment 2 (Quality of obtained adjacency matrices)
 
 `Experiment_2.ipynb` - training of GNN model with another architecture without graph structure learning layer. Adjacency matrices were obtained in Experiment 1:
+
 `corr_A.pt`
-`dir_A.pt`
+`direct_A.pt`
 `relu_A.pt`
 `uni_A.pt`
 `und_A.pt`
