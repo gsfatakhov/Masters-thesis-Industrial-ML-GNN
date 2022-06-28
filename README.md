@@ -8,4 +8,4 @@ The Tennessee Eastman Process (extended).
 
 ## Experiment 1
 
-Experiment_1.ipynb -- training of proposed GNN model with graph structure learning layer for Fault Diagnosis task.
+'Experiment_1.ipynb' - training of proposed GNN model with graph structure learning layer for Fault Diagnosis task.
